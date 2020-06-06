@@ -1,0 +1,41 @@
+{
+  "name": "Youtube Caption Search",
+  "version": "0.0.1",
+  "description": "Find a certain word in Youtube captions",
+  "permissions": [
+    "declarativeContent",
+    "activeTab",
+    "storage",
+    "contextMenus"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "page_action": {
+    "default_title": "search for a word in a video",
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "keys.js",
+        "content.js"
+      ]
+    }
+  ],
+  "commands": {
+    "search": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F"
+      },
+      "description": "search for text"
+    }
+  },
+  "manifest_version": 2
+}
