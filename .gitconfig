@@ -1,2 +1,2 @@
-git config --global filter.ignoreline.clean "sed '/\\/\\/ignoreline/'d"
+git config --global filter.ignoreline.clean "sed '/\/\/ignoreline$/' d"
 git config --global filter.ignoreline.smudge cat

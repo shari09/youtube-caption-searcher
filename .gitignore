@@ -1,3 +1,5 @@
 node_modules/
 .prettierrc.js
 keys.js
+example.json
+youtube.js
