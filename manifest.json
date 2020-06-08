@@ -5,8 +5,7 @@
   "permissions": [
     "declarativeContent",
     "activeTab",
-    "storage",
-    "contextMenus"
+    "storage"
   ],
   "background": {
     "scripts": [
@@ -21,10 +20,9 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.youtube.com/*"
+        "https://www.youtube.com/watch*"
       ],
       "js": [
-        "keys.js",
         "content.js"
       ]
     }

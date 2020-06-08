@@ -1,9 +1,10 @@
-const urlDecode = (encoded) => {
+const urlDecode = (encoded: string) => {
   return '{' + decodeURIComponent(encoded.replace(/\+/g, ' ')) + '}';
 };
 
 const captionTrackRegex = /"captionTracks":\[.*?\]/g;
 const captionTrackMatch = captionTrackRegex.exec(
+  //@ts-ignore
   ytplayer.config.args.player_response,
 );
 const captionTracks = captionTrackMatch

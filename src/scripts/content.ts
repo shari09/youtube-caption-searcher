@@ -1,7 +1,17 @@
 const test = 'fasdf'; //ignoreline
 
 console.log('lkasdjfljflsdjf');
-let transcripts = [];
+
+interface CaptionTrack {
+  baseUrl: string;
+}
+
+type Transcript = {
+  start: string;
+  text: string;
+}[];
+
+let transcripts: undefined | Transcript[];
 
 //inject the getting caption tracks script
 const script = document.createElement('script');
@@ -9,23 +19,22 @@ script.src = chrome.runtime.getURL('get_caption_tracks.js');
 (document.head || document.documentElement).appendChild(script);
 
 chrome.runtime.onMessage.addListener(async (msg, sender, res) => {
-  if (msg.action !== 'search') {
+  if (msg.action !== 'load') {
     res({message: `action not found ${msg.action}`});
     return;
   }
-
-  console.log('received');
-  res({message: 'done'});
+  res(transcripts);
 });
 
 document.addEventListener('captionTracks', async (event) => {
-  transcripts = await getTranscripts(event.detail.captionTracks);
+  const typedEvent: CustomEvent = <CustomEvent>event;
+  transcripts = await getTranscripts(typedEvent.detail.captionTracks);
   console.log(transcripts);
 });
 
-const getTranscripts = async (captionTrackInfos) => {
+const getTranscripts = async (captionTracks: CaptionTrack[]) => {
   const allTracks = await Promise.all(
-    captionTrackInfos.map(async (track) => {
+    captionTracks.map(async (track) => {
       const xmlTrack = await fetch(track.baseUrl, {
         method: 'GET',
         headers: {
@@ -51,7 +60,7 @@ const getTranscripts = async (captionTrackInfos) => {
   return allTracks;
 };
 
-const filterSpecialSymbols = (text) => {
+const filterSpecialSymbols = (text: string) => {
   const specialSymbols = ['&amp;quot;', '&amp;#39;'];
   const filtered = ['"', "'"];
   specialSymbols.forEach((symbol, index) => {

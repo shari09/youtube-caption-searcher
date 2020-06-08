@@ -1,5 +1,5 @@
 node_modules/
+dist/
 .prettierrc.js
-keys.js
 example.json
 youtube.js
