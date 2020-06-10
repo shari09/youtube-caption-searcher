@@ -1,7 +1,7 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "module": "esnext",
+    "module": "commonjs",
     "target": "ESNext",
     "strict": true,
     "noImplicitAny": true,
@@ -22,5 +22,5 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/scripts/*"]
+  "include": ["src/scripts/*", "src/common/*", "src/popup/src/util/functions.ts"]
 }

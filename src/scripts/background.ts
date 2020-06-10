@@ -13,19 +13,3 @@ chrome.runtime.onInstalled.addListener(() => {
     ]);
   });
 });
-
-chrome.commands.onCommand.addListener((command) => {
-  if (command === 'search') {
-    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-      if (!tabs[0].id) throw new Error('active tab id not found');
-
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        {action: 'search', url: tabs[0].url},
-        (res: any) => {
-          console.log(res);
-        },
-      );
-    });
-  }
-});

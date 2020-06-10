@@ -2,16 +2,27 @@
   "name": "youtube_caption_searcher",
   "version": "0.0.1",
   "private": true,
+  "dependencies": {
+    "chrome-extension-async": "^3.4.1"
+  },
   "devDependencies": {
     "@types/chrome": "0.0.114",
     "@types/node": "^14.0.11",
-    "typescript": "^3.9.5"
+    "awesome-typescript-loader": "^5.2.1",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^3.9.5",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
   },
   "scripts": {
-    "build:scripts": "tsc",
+    "build:scripts": "NODE_ENV=development webpack --config webpack.config.js",
     "build:manifest": "cp manifest.json dist/manifest.json",
     "build:popup": "npm run build --prefix src/popup && cp -r src/popup/build/* dist",
+    "watch:scripts": "NODE_ENV=development webpack --config webpack.config.js -w",
+    "watch:manifest": "cp manifest.json dist/manifest.json",
     "watch:popup": "npm run watch --prefix src/popup",
-    "start": "npm run build:scripts && npm run build:manifest && npm run watch:popup"
+    "watch": "npm-run-all --parallel watch:*",
+    "build": "npm run build:scripts && npm run build:manifest && npm run build:popup",
+    "start": "npm run watch"
   }
 }
