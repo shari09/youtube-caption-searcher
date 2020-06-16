@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "chrome-extension-async": "^3.4.1"
+    "chrome-extension-async": "^3.4.1",
+    "webfontloader": "^1.6.28"
   },
   "devDependencies": {
     "@types/chrome": "0.0.114",

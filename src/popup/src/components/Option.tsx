@@ -1,5 +1,6 @@
 import React, {useContext} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native-web';
+import {View, Text} from 'react-native-web';
+import {Button} from 'react-bootstrap';
 
 interface Props {
   navigation: any;
@@ -7,32 +8,39 @@ interface Props {
   name: string;
 }
 
-
 export const Option: React.FC<Props> = ({navigation, trackId, name}) => {
   const styles = getStyles();
-  
+
   return (
-    <View>
-      <TouchableOpacity
+    <View style={styles.container}>
+      <Button
+        variant='light'
         style={styles.option}
-        onPress={() => {
+        onClick={() => {
           navigation.navigate('TrackPage', {
             trackId: trackId,
           });
-          console.log('lskdjfls');
         }}
       >
-        <Text>{name}</Text>
-      </TouchableOpacity>
+        {name}
+      </Button>
     </View>
   );
 };
 
 const getStyles = () => {
-  return StyleSheet.create({
-    option: {}
-  });
+  return {
+    container: {
+    },
+    option: {
+      padding: 5,
+    },
+    text: {
+      fontFamily: 'Roboto',
+      textAlign: 'center',
+      fontSize: 15,
+    },
+  };
 };
-
 
 export default Option;

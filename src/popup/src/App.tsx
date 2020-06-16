@@ -4,7 +4,12 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import {Transcript} from '../../common/types';
 import {getActiveTabId} from './util/functions';
-import {TranscriptsContext, ITranscriptsContext} from './util/context';
+import {
+  TranscriptsContext,
+  ITranscriptsContext,
+  ThemeContext,
+  defaultTheme,
+} from './util/context';
 import {SelectTrackPage} from './pages/SelectTrackPage';
 import {TrackPage} from './pages/TrackPage';
 
@@ -42,27 +47,29 @@ const App: React.FC = () => {
 
   return (
     <TranscriptsContext.Provider value={transcriptsContext}>
-      <NavigationContainer>
-        <View style={styles.container}>
-          <Stack.Navigator
-            screenOptions={{
-              headerShown: false,
-            }}
-          >
-            {transcripts.length > 1 ? (
+      <ThemeContext.Provider value={defaultTheme}>
+        <NavigationContainer>
+          <View style={styles.container}>
+            <Stack.Navigator
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              {transcripts.length > 1 ? (
+                <Stack.Screen
+                  name="SelectTrackPage"
+                  component={SelectTrackPage}
+                />
+              ) : undefined}
               <Stack.Screen
-                name="SelectTrackPage"
-                component={SelectTrackPage}
+                name="TrackPage"
+                component={TrackPage}
+                initialParams={{trackId: 0}}
               />
-            ) : undefined }
-            <Stack.Screen
-              name="TrackPage"
-              component={TrackPage}
-              initialParams={{trackId: 0}}
-            />
-          </Stack.Navigator>
-        </View>
-      </NavigationContainer>
+            </Stack.Navigator>
+          </View>
+        </NavigationContainer>
+      </ThemeContext.Provider>
     </TranscriptsContext.Provider>
   );
 };

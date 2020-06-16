@@ -4,9 +4,13 @@ import {View, StyleSheet, Text} from 'react-native-web';
 interface Props {
   start: number;
   text: string;
+  markedTexts: {
+    index: number;
+    length: number;
+  }[];
 }
 
-export const CaptionLine: React.FC<Props> = ({start, text}) => {
+export const CaptionLine: React.FC<Props> = ({start, text, markedTexts}) => {
   const styles = getStyles();
 
   const getTime = () => {
@@ -24,24 +28,57 @@ export const CaptionLine: React.FC<Props> = ({start, text}) => {
     return timeStr;
   };
 
+  //TODO: pls make this a tolerable block of code cuz i don't really wanna do it rn functioing on lack of sleep
+  const getText = () => {
+    if (markedTexts.length === 0) return text;
+    const markStyle = {
+      paddingLeft: 0,
+      paddingRight: 0,
+    };
+
+    const subStrings = markedTexts.reduce((acc, pos) => {
+      //[normal text, marked text, lastIndex]
+      //find the index where the string slicing ended at
+      const lastIndex = acc.length > 0 ? acc[acc.length - 1][2] : 0;
+      acc.push([
+        text.slice(lastIndex, pos.index),
+        <mark style={markStyle}>
+          {text.slice(
+            pos.index,
+            pos.index + pos.length,
+          )}
+        </mark>,
+        pos.index + pos.length,
+      ]);
+      return acc;
+    }, [] as any[][]);
+    const lastElement = text.slice(subStrings[subStrings.length - 1][2]);
+    const elements = subStrings.reduce((acc, group) => {
+      acc.push(group[0]);
+      acc.push(group[1]);
+      return acc;
+    }, [] as any[]);
+    elements.push(lastElement);
+    return elements;
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.start}>
+    <div style={styles.container}>
+      <span style={styles.start}>
         <Text>{getTime()}</Text>
-      </View>
-      <View style={styles.text}>
-        <Text>{text}</Text>
-      </View>
-    </View>
+      </span>
+      <span style={styles.text}>{getText()}</span>
+    </div>
   );
 };
 
 const getStyles = () => {
-  return StyleSheet.create({
+  return {
     container: {
-      flexDirection: 'row',
+      flexDirection: 'row' as 'row',
       backgroundColor: 'white',
       paddingBottom: 5,
+      display: 'flex' as 'flex',
     },
     start: {
       flex: 1,
@@ -53,7 +90,7 @@ const getStyles = () => {
       flex: 5,
       paddingLeft: 5,
     },
-  });
+  };
 };
 
 export default CaptionLine;
