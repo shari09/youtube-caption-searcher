@@ -10,13 +10,20 @@ interface Props {
   navigation: any;
 }
 
-interface Line {
+export interface Line {
   start: number;
   text: string;
   markedTexts: {
     index: number;
     length: number;
+    focused: boolean;
   }[];
+}
+
+export interface MatchIterator {
+  matchIdx: number;
+  lineNum: number;
+  markedTextNum: number;
 }
 
 export const TrackPage: React.FC<Props> = ({route, navigation}) => {
@@ -24,20 +31,34 @@ export const TrackPage: React.FC<Props> = ({route, navigation}) => {
   const {trackId} = route.params;
   const timedText = transcripts[trackId].timedText;
   const collapsedText = timedText.reduce(
-    (total, cur) => total + cur.text + ' ',
+    (total, cur) => total + cur.text + '\n',
     '',
   );
+  console.log(collapsedText);
 
   const [query, setQuery] = useState<string>('');
-  const [matchIdx, setMatchIdx] = useState<number>(-1);
+  const [curMatch, setCurMatch] = useState<MatchIterator|undefined>();
   const [numMatches, setNumMatches] = useState<number>(0);
   const [queryMatches, setQueryMatches] = useState<RegExpMatchArray[]>([]);
   const [highlightedLines, setHighlightedLines] = useState<Line[]>([]);
+  const [matchItr, setMatchItr] = useState<
+    Generator<MatchIterator> | undefined
+  >();
+
+  const [activeLineRef, setActiveLineRef] = useState<HTMLDivElement|null>(null);
 
   const styles = getStyles();
 
   const getLines = () => {
-    return highlightedLines.map((line) => {
+    return highlightedLines.map((line, index) => {
+      if (curMatch?.lineNum === index) {
+        return <CaptionLine
+          setRef={setActiveLineRef}
+          start={Number(line.start)}
+          text={line.text}
+          markedTexts={line.markedTexts}
+        />
+      }
       return (
         <CaptionLine
           start={Number(line.start)}
@@ -49,17 +70,29 @@ export const TrackPage: React.FC<Props> = ({route, navigation}) => {
   };
 
   useEffect(() => {
+    if (activeLineRef) {
+      window.scroll(0, activeLineRef.offsetTop);
+    }
+  }, [activeLineRef]);
+
+  useEffect(() => {
+    reset();
     if (query === '') {
-      setMatchIdx(-1);
-      setNumMatches(0);
+      return;
+    }
+
+    let matchArr: RegExpMatchArray[] = [];
+    //TODO: make this less sketchy and have checks maybe for invalid regex
+    try {
+      const searchRegex = new RegExp(query, 'gi');
+      matchArr = [...collapsedText.matchAll(searchRegex)];
+    } catch (e) {
       reset();
       return;
-    };
-    const searchRegex = new RegExp(query, 'gi');
-    const matchArr = [...collapsedText.matchAll(searchRegex)];
+    }
+
     setQueryMatches(matchArr);
     setNumMatches(matchArr.length);
-    setMatchIdx(matchArr.length - 1);
   }, [query]);
 
   const getHighLightedLines = (): Line[] => {
@@ -69,29 +102,33 @@ export const TrackPage: React.FC<Props> = ({route, navigation}) => {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       let matchCharIdx = queryMatches[queryIdx].index;
-      if (!matchCharIdx) throw new Error('no index found for query match');
+      console.log(queryMatches[queryIdx]);
+      if (matchCharIdx === undefined)
+        throw new Error('no index found for query match');
 
-      while (matchCharIdx - totalLength < line.text.length - 1) {
+      while (matchCharIdx - totalLength < line.text.length) {
         console.log(queryMatches[queryIdx]);
         lines[i].markedTexts.push({
           index: matchCharIdx - totalLength,
           length: queryMatches[queryIdx][0].length,
+          focused: false,
         });
         queryIdx++;
 
         if (queryIdx === queryMatches.length) return lines;
 
         matchCharIdx = queryMatches[queryIdx].index;
-        if (!matchCharIdx) throw new Error('no index found for query match');
+        if (matchCharIdx === undefined)
+          throw new Error('no index found for query match');
       }
-      //plus one because of the space i added to collapsed msgs
+      //plus one because of the \n I added to collapsedTexts
       totalLength += line.text.length + 1;
       console.log(lines);
     }
     return lines;
   };
 
-  const reset = () => {
+  const resetHighlightedLines = () => {
     const lines: Line[] = Array.from(timedText).map((text) => {
       const line = (text as unknown) as Line;
       line.markedTexts = [];
@@ -100,15 +137,60 @@ export const TrackPage: React.FC<Props> = ({route, navigation}) => {
     setHighlightedLines(lines);
   };
 
+  const reset = () => {
+    setCurMatch(undefined);
+    setNumMatches(0);
+    resetHighlightedLines();
+  };
+
   useEffect(() => {
-    reset();
     if (!queryMatches || queryMatches.length === 0) {
       return;
     }
-    setHighlightedLines(getHighLightedLines());
+    const lines = getHighLightedLines();
+    setHighlightedLines(lines);
+    setMatchItr(getNextMatchPos(lines));
   }, [queryMatches]);
 
-  const getNextMatch = () => {};
+  //gets the first match after the match iterator has been updated
+  useEffect(() => {
+    //no match found
+    if (!matchItr) {
+      setCurMatch(undefined);
+      return;
+    };
+    getNextMatch();
+  }, [matchItr]);
+
+  function* getNextMatchPos(lines: Line[]): Generator<MatchIterator> {
+    let matchIdx = 0;
+    while (true) {
+      for (let i = 0; i < lines.length; i++) {
+        for (let j = 0; j < lines[i].markedTexts.length; j++) {
+          matchIdx = matchIdx === numMatches ? 0 : matchIdx;
+          const match: MatchIterator = {
+            matchIdx: matchIdx++,
+            lineNum: i,
+            markedTextNum: j,
+          };
+          yield match;
+        }
+      }
+    }
+  }
+
+  const getNextMatch = () => {
+    if (!matchItr) throw new Error('no iterator');
+    
+    let lines = Array.from(highlightedLines);
+    if (curMatch) {
+      lines[curMatch.lineNum].markedTexts[curMatch.markedTextNum].focused = false;
+    }
+    const match: MatchIterator = matchItr.next().value;
+    setCurMatch(match);
+    lines[match.lineNum].markedTexts[match.markedTextNum].focused = true;
+    setHighlightedLines(lines);
+  };
 
   return (
     <View style={styles.container}>
@@ -116,7 +198,7 @@ export const TrackPage: React.FC<Props> = ({route, navigation}) => {
         query={query}
         navigation={navigation}
         setQuery={setQuery}
-        matchIdx={matchIdx + 1}
+        matchIdx={curMatch ? curMatch.matchIdx+1 : 0}
         numMatches={numMatches}
         getNextMatch={getNextMatch}
       />

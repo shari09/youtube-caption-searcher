@@ -71,7 +71,7 @@ export const SearchBar: React.FC<Props> = ({
       </span>
       <input
         style={styles.searchBar}
-        placeholder="Search"
+        placeholder="Regex search"
         value={query}
         onChange={(event) => {
           setQuery(event.target.value);
@@ -112,6 +112,7 @@ const getStyles = (colours: IThemeContext) => {
     searchBar: {
       flex: 5,
       marginRight: 10,
+      outline: 'none',
     },
     backWrapper: {
       flex: 3,

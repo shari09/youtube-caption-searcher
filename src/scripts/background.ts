@@ -1,3 +1,5 @@
+
+//only runs on pages with a youtube video
 chrome.runtime.onInstalled.addListener(() => {
   //remove all rules on page change
   chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
@@ -5,10 +7,10 @@ chrome.runtime.onInstalled.addListener(() => {
       {
         conditions: [
           new chrome.declarativeContent.PageStateMatcher({
-            pageUrl: {hostEquals: 'www.youtube.com', schemes: ['https']},
+            pageUrl: {hostEquals: 'www.youtube.com', schemes: ['https'], pathPrefix: 'watch'},
           }),
         ],
-        actions: [new chrome.declarativeContent.ShowPageAction()],
+        actions: [new chrome.declarativeContent.ShowPageAction()], //get permission
       },
     ]);
   });

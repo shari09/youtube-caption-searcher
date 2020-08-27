@@ -7,10 +7,19 @@ interface Props {
   markedTexts: {
     index: number;
     length: number;
+    focused: boolean;
   }[];
+  setRef?: React.Dispatch<React.SetStateAction<HTMLDivElement | null>>;
 }
 
-export const CaptionLine: React.FC<Props> = ({start, text, markedTexts}) => {
+type Ref = HTMLDivElement;
+
+export const CaptionLine: React.FC<Props> = ({
+  start,
+  text,
+  markedTexts,
+  setRef,
+}) => {
   const styles = getStyles();
 
   const getTime = () => {
@@ -20,11 +29,10 @@ export const CaptionLine: React.FC<Props> = ({start, text, markedTexts}) => {
     const numMin = Math.floor(time / 60);
     time = time % 60;
     const timeStr =
-      (numHour > 0 ? numHour.toString() + 'h' : '') +
-      numMin.toString() +
-      'm' +
-      time.toFixed(0) +
-      's';
+      (numHour > 0 ? numHour.toString() + ':' : '') +
+      numMin.toString().padStart(2, '0') +
+      ':' +
+      time.toFixed(0).padStart(2, '0');
     return timeStr;
   };
 
@@ -36,19 +44,19 @@ export const CaptionLine: React.FC<Props> = ({start, text, markedTexts}) => {
       paddingRight: 0,
     };
 
-    const subStrings = markedTexts.reduce((acc, pos) => {
+    const subStrings = markedTexts.reduce((acc, cur) => {
+      const highlightColour = {
+        backgroundColor: cur.focused ? 'orange' : undefined,
+      };
       //[normal text, marked text, lastIndex]
       //find the index where the string slicing ended at
       const lastIndex = acc.length > 0 ? acc[acc.length - 1][2] : 0;
       acc.push([
-        text.slice(lastIndex, pos.index),
-        <mark style={markStyle}>
-          {text.slice(
-            pos.index,
-            pos.index + pos.length,
-          )}
+        text.slice(lastIndex, cur.index),
+        <mark style={{...markStyle, ...highlightColour}}>
+          {text.slice(cur.index, cur.index + cur.length)}
         </mark>,
-        pos.index + pos.length,
+        cur.index + cur.length,
       ]);
       return acc;
     }, [] as any[][]);
@@ -63,7 +71,12 @@ export const CaptionLine: React.FC<Props> = ({start, text, markedTexts}) => {
   };
 
   return (
-    <div style={styles.container}>
+    <div
+      style={styles.container}
+      ref={(ref) => {
+        if (setRef) setRef(ref);
+      }}
+    >
       <span style={styles.start}>
         <Text>{getTime()}</Text>
       </span>

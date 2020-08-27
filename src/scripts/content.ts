@@ -19,6 +19,7 @@ chrome.runtime.onMessage.addListener(async (msg, sender, res) => {
   return true;
 });
 
+//listen to the event to get the caption tracks from inject script
 document.addEventListener('captionTracks', async (event) => {
   const typedEvent: CustomEvent = <CustomEvent>event;
   if (typedEvent.detail === null) {
@@ -28,6 +29,8 @@ document.addEventListener('captionTracks', async (event) => {
   transcripts = await getTranscripts(typedEvent.detail.captionTracks);
 });
 
+
+//return a formatted caption track from the caption track url
 const getTranscripts = async (
   captionTracks: CaptionTrack[],
 ): Promise<Transcript[]> => {
@@ -61,6 +64,7 @@ const getTranscripts = async (
   );
   return transcripts;
 };
+
 
 const filterSpecialSymbols = (text: string) => {
   const specialSymbols = ['&amp;quot;', '&amp;#39;'];
