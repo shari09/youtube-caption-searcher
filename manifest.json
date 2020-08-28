@@ -3,10 +3,7 @@
   "version": "0.0.1",
   "description": "Find a certain word in Youtube captions",
   "permissions": [
-    "declarativeContent",
-    "activeTab",
-    "storage",
-    "debugger"
+    "declarativeContent"
   ],
   "background": {
     "scripts": [
@@ -21,7 +18,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.youtube.com/watch?*"
+        "https://www.youtube.com/*"
       ],
       "js": [
         "scripts/content.js"

@@ -1,66 +1,17 @@
-
-// export const getActiveTabId = async (): Promise<number> => {
-//   const tabs = await chrome.tabs.query({active: true, currentWindow: true});
-//   console.log(tabs);
-//   if (!tabs) throw new Error('invalid active tab');
-//   if (!tabs[0].id) throw new Error('active tab id not found');
-//   return tabs[0].id;
-// };
-
-// const getCurUrl = async (): Promise<string> => {
-//   const tabs = await chrome.tabs.query({active: true, currentWindow: true});
-//   if (!tabs[0] || !tabs[0].url) throw new Error('invalid active tab');
-//   return tabs[0].url;
-// };
-
-// const getCurUrl = (): Promise<string> => {
-//   return new Promise((resolve, reject) => {
-//     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-//       console.log(tabs);
-//       if (!tabs[0] || !tabs[0].url) reject('invalid active tab');
-//       console.log(tabs[0].url);
-//       resolve(tabs[0].url);
-//     });
-//   });
-// };
-
-// const urlDecode = (encoded: string) => {
-//   return '{' + decodeURIComponent(encoded.replace(/\+/g, ' ')) + '}';
-// };
-
-// const sendCaptionTracks = () => {
-  // const captionTrackRegex = /"captionTracks":\[.*?\]/g;
-  // const captionTrackMatch = captionTrackRegex.exec(
-  //   //@ts-ignore
-  //   ytplayer.config.args.player_response,
-  // );
-//   const captionTracks = captionTrackMatch
-//     ? JSON.parse(urlDecode(captionTrackMatch[0]))
-//     : null;
-
-//   document.dispatchEvent(
-//     new CustomEvent('captionTracks', {
-//       detail: captionTracks,
-//     }),
-//   );
-//   console.log('sent new caption track');
-//   console.log(captionTracks);
-// };
 console.log('whaaaaaaaa');
 
 /**
  * getting the request url
  * @param videoId the video that you hope to get captions for
  */
-const getReqUrl = (videoId: string) => {
-  const origin = window.location.origin;
-  const pathname = window.location.pathname;
-  const xmhReqParam = 'pbj=1';
-  //this is so sketchy i'll use the url module later
-  return origin + pathname + '?'+ videoId + '&' + xmhReqParam;
+const getReqUrl = (href: string): string|null => {
+  // //this is so sketchy i'll use the url module later
+  const videoIdPathMatch = /(https:\/\/www\.youtube\.com\/watch\?v=[^!]+)(&|$)/.exec(href);
+  if (!videoIdPathMatch) return null;
+  return videoIdPathMatch[1]+'&pbj=1';
 };
 
-const sendCaptionTracks = async(videoId: string) => {
+const sendCaptionTracks = async(href: string) => {
   
   //get the newly loaded data
   //because somehow DOM doesn't update on a new video click, so this is how you're gonna get it
@@ -71,7 +22,9 @@ const sendCaptionTracks = async(videoId: string) => {
   const clientVersion = window.yt.config_.INNERTUBE_CONTEXT_CLIENT_VERSION;
   //@ts-ignore
   const clientName = window.yt.config_.INNERTUBE_CONTEXT_CLIENT_NAME;
-  const reqUrl = getReqUrl(videoId);
+
+  const reqUrl = getReqUrl(href);
+  if (!reqUrl) return;
   console.log(reqUrl);
   const vidRawData = await fetch(reqUrl, {
     headers: {
@@ -84,9 +37,14 @@ const sendCaptionTracks = async(videoId: string) => {
     credentials: 'include',
   });
   const response = await vidRawData.json();
-  //@ts-ignore
   let captionTracks;
-  if (!response[2].playerResponse.captions) {
+  if (
+    !response[2].playerResponse.captions 
+    || !response[2]
+       .playerResponse
+       .captions
+       .playerCaptionsTracklistRenderer
+       .captionTracks) {
     captionTracks = null;
   } else {
     captionTracks = {
@@ -108,49 +66,28 @@ const sendCaptionTracks = async(videoId: string) => {
   console.log(captionTracks);
 };
 
-let videoLinks: Element[] = [];
-let eventListeners: (() => void)[] = [];
 
+let oldHref = window.location.href;
 
-const addListeners = () => {
-  const clickableElements = Array.from(
-    document.getElementsByClassName('yt-simple-endpoint'),
-  );
-
-  videoLinks = clickableElements.filter((element) => {
-    const href = element.getAttribute('href');
-    if (!href) return false;
-    if (!href.includes('/watch?v')) return false;
-    return true;
+const addHrefChangeListener = () => {
+  const body = document.querySelector('body');
+  if (!body) throw new Error('something rlly bad broke, the body tag disappeared');
+  
+  const mo = new MutationObserver((mutationList, observer) => {
+    const newHref = window.location.href;
+    if (oldHref !== newHref) {
+      //get the new href if the video changes to see if there new caption tracks
+      console.log(newHref);
+      sendCaptionTracks(newHref);
+      oldHref = newHref;
+    }
   });
-
-  videoLinks.forEach((element, index) => {
-    const listener = () => {
-      const href = videoLinks[index].getAttribute('href');
-      const videoIdMatch = /(v=[^!]+)&/.exec(href);
-      if (!videoIdMatch) throw new Error('cannot find video id from element');
-
-      removeListeners();
-      sendCaptionTracks(videoIdMatch[1]);
-      addListeners();
-    };
-    //each one is a different listener corresponding to a different element
-    eventListeners.push(listener);
-    element.addEventListener('click', eventListeners[index]);
+  mo.observe(body, {
+    attributes: true,
+    subtree: true,
   });
 };
 
-const removeListeners = () => {
-  videoLinks.forEach((element, index) => {
-    element.removeEventListener('click', eventListeners[index]);
-  });
-  videoLinks = [];
-  eventListeners = [];
-};
+addHrefChangeListener();
 
-
-const videoIdMatch = /(v=[^!]+)&/.exec(window.location.search);
-if (!videoIdMatch) throw new Error('cannot find video id from path');
-//initially get the videoId from url path
-sendCaptionTracks(videoIdMatch[1]);
-addListeners();
+sendCaptionTracks(window.location.href);
