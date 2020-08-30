@@ -11,12 +11,26 @@ const script = document.createElement('script');
 script.src = chrome.runtime.getURL('scripts/inject.js');
 (document.head || document.documentElement).appendChild(script);
 
+
+//return true indicates async
 chrome.runtime.onMessage.addListener(async (msg, sender, res) => {
-  if (msg.action !== 'load') {
-    res({message: `action not found ${msg.action}`});
+  switch (msg.action) {
+    case 'load':
+      res(transcripts);
+      return true;
+    case 'jumpToTime':
+      document.dispatchEvent(
+        new CustomEvent('jumpToTime', {
+          detail: {time: msg.data.time}, //the time to jump to
+        }),
+      );
+      res({message: 'success'});
+      break;
+    default:
+      res({message: `action not found ${msg.action}`});
+      break;
   }
-  res(transcripts);
-  return true;
+  return false;
 });
 
 document.addEventListener('captionTracks', async (event) => {
@@ -26,6 +40,7 @@ document.addEventListener('captionTracks', async (event) => {
     return;
   }
   transcripts = await getTranscripts(typedEvent.detail.captionTracks);
+  console.log('content', transcripts);
 });
 
 const getTranscripts = async (
@@ -50,7 +65,7 @@ const getTranscripts = async (
         let captionMatch = captionRegex.exec(xmlText);
         while (captionMatch) {
           transcript.timedText.push({
-            start: captionMatch[1],
+            start: Number(captionMatch[1]),
             text: captionMatch[2],
           });
           captionMatch = captionRegex.exec(xmlText);

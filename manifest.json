@@ -36,5 +36,9 @@
       "description": "search for text"
     }
   },
-  "manifest_version": 2
+  "manifest_version": 2,
+  "icons": {
+    "32": "icon32.png",
+    "64": "icon64.png"
+  }
 }

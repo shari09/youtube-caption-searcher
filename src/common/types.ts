@@ -1,7 +1,7 @@
 export interface Transcript {
   language: string;
   timedText: {
-    start: string;
+    start: number;
     text: string;
   }[];
 }

@@ -7,8 +7,8 @@ import WebFont from 'webfontloader';
 
 WebFont.load({
   google: {
-    families: ['Roboto', 'Muli', 'Nunito', 'sans-serif']
-  }
+    families: ['Architects Daughter', 'Open Sans:400', 'Rowdies:300,400']
+  },
 });
 
 ReactDOM.render(
