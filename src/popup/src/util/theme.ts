@@ -10,10 +10,10 @@ export const theme = {
       caption: '#030303',
     },
     background: '#FFFFFF',
-    alternateBackground: '#0000000D',
+    grayOverlay: '#0000000D',
+    alternateBackground: '#f0f0f0',
     primary: '#FF8484',
     secondary: '#B83737',
-    light: '#FCE9E9',
     contrast: '#6B2020',
     overlay: '#FCE9E980',
     modes: {
@@ -31,6 +31,7 @@ export const theme = {
     medium: 16,
     large: 18,
     larger: 20,
+    largest: 24,
   },
   fontWeight: {
     body: 'normal',
@@ -44,7 +45,7 @@ export const theme = {
   },
   bodyWrapper: {
     px: '10%',
-    mt: '10vh',
+    mt: '12vh', //navbar height, this is so hardcoded
     py: '3%',
   },
   redEllipse: {

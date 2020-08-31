@@ -24,6 +24,7 @@ code {
 ::-webkit-scrollbar {
   width: 10px;
   height: 18px;
+  background-color: white;
 }
 ::-webkit-scrollbar-thumb {
   height: 6px;

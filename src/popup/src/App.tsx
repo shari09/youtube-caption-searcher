@@ -13,6 +13,8 @@ import {NoTranscript} from './pages/NoTranscript';
 import {Navigation} from './components/Navigation';
 import { Home } from './pages/Home';
 import { SearchPage } from './pages/SearchPage';
+import { Preference } from './pages/Preference';
+import { About } from './pages/About';
 
 export const App: React.FC = () => {
   const [transcripts, setTranscripts] = useState<Transcript[]>();
@@ -58,6 +60,8 @@ export const App: React.FC = () => {
                 : Home
             } />
             <Route path='/search' component={SearchPage} />
+            <Route path='/preference' component={Preference} />
+            <Route path='/about' component={About} />
           </Switch>
         </Router>
       </ThemeProvider>
