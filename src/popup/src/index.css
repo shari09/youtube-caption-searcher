@@ -6,7 +6,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   width: 350px;
-  height: 450px;
+  height: 470px;
 }
 
 code {
@@ -16,7 +16,7 @@ code {
 
 #root {
   width: 350px;
-  height: 450px;
+  height: 470px;
   overflow-y: hidden;
 }
 
