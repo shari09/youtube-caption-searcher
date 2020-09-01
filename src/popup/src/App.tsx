@@ -1,8 +1,8 @@
 /** @jsx jsx */
 import React, {useEffect, useState} from 'react';
-import {HashRouter as Router, Switch, Route, Redirect} from 'react-router-dom';
+import {HashRouter as Router, Switch, Route} from 'react-router-dom';
 
-import {jsx, SxStyleProp, ThemeProvider} from 'theme-ui';
+import {jsx, ThemeProvider} from 'theme-ui';
 import {theme} from './util/theme';
 
 import {Transcript} from '../../common/types';
@@ -15,20 +15,22 @@ import { Home } from './pages/Home';
 import { SearchPage } from './pages/SearchPage';
 import { Preference } from './pages/Preference';
 import { About } from './pages/About';
+import { Features } from './pages/Features';
 
 export const App: React.FC = () => {
   const [transcripts, setTranscripts] = useState<Transcript[]>();
 
+  
   const loadTranscripts = async () => {
     chrome.tabs.sendMessage(
       await getActiveTabId(),
       {action: 'load'},
       (response) => {
         setTranscripts(response);
-        console.log('res', transcripts);
+        // console.log('res', transcripts);
       },
     );
-    console.log('transcripts loaded into extension');
+    // console.log('transcripts loaded into extension');
     
   };
 
@@ -50,7 +52,7 @@ export const App: React.FC = () => {
       <ThemeProvider theme={theme}>
         <Router>
           <Navigation />
-          <Switch>
+          <Switch>            
             <Route 
               exact 
               path='/' 
@@ -62,6 +64,7 @@ export const App: React.FC = () => {
             <Route path='/search' component={SearchPage} />
             <Route path='/preference' component={Preference} />
             <Route path='/about' component={About} />
+            <Route path='/features' component={Features} />
           </Switch>
         </Router>
       </ThemeProvider>

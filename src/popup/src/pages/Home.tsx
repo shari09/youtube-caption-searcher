@@ -1,31 +1,34 @@
 /** @jsx jsx */
-import React, { useContext } from 'react';
-import {jsx, SxStyleProp} from 'theme-ui';
+import React, {useContext} from 'react';
+import {jsx, SxStyleProp, useColorMode} from 'theme-ui';
 import {Link} from 'react-router-dom';
-import { ITranscriptsContext, TranscriptsContext } from '../util/context';
-import { LoadingScreen } from './LoadingScreen';
-import { randInt } from '../util/functions';
-
+import {ITranscriptsContext, TranscriptsContext} from '../util/context';
+import {LoadingScreen} from './LoadingScreen';
+import {randInt} from '../util/functions';
 
 export const Home: React.FC = () => {
-
   const {transcripts} = useContext<ITranscriptsContext>(TranscriptsContext);
-  if (!transcripts) return <LoadingScreen/>;
 
+  // const [colourMode, setColourMode] = useColorMode();
+  // setColourMode('default');
+  if (!transcripts) return <LoadingScreen />;
 
   const getTrackButtons = () => {
     return transcripts.map((transcript, i) => {
       const isRed = Math.random() > 0.5;
-      const words = transcript.language.trim().toUpperCase().split(' ');
+      const words =
+        transcript.language.length > 15 //don't split it if they're short enough
+          ? transcript.language.trim().toUpperCase().split(' ')
+          : [transcript.language];
       //split the words if there are multiple words
       const longestCharNum = words.reduce((largest, cur) => {
         return largest > cur.length ? largest : cur.length;
       }, 0);
-      const wordsJsx = words.map(word => {
+      const wordsJsx = words.map((word) => {
         return (
-          <React.Fragment>
+          <React.Fragment key={word}>
             {word}
-            <br/>
+            <br />
           </React.Fragment>
         );
       });
@@ -33,9 +36,9 @@ export const Home: React.FC = () => {
       const ellipseStyle: SxStyleProp = {
         variant: isRed ? 'redEllipse' : 'whiteEllipse',
         display: 'flex',
-        width: `${longestCharNum+3}ch`,
-        height: `${longestCharNum+3}ch`,
-        mt: randInt(8, 30)+'px',
+        width: `${longestCharNum + 3}ch`,
+        height: `${longestCharNum + 3}ch`,
+        mt: randInt(8, 30) + 'px',
         '&:hover': {
           cursor: 'pointer',
           backgroundColor: isRed ? 'secondary' : 'background',
@@ -51,8 +54,8 @@ export const Home: React.FC = () => {
       };
 
       return (
-        <Link 
-          sx={ellipseStyle} 
+        <Link
+          sx={ellipseStyle}
           to={{
             pathname: '/search',
             state: {
@@ -63,11 +66,8 @@ export const Home: React.FC = () => {
           <p sx={textStyle}>{wordsJsx}</p>
         </Link>
       );
-
     });
-    
   };
-
 
   const wrapperStyle: SxStyleProp = {
     variant: 'bodyWrapper',

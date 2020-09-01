@@ -18,7 +18,19 @@ export const theme = {
     overlay: '#FCE9E980',
     modes: {
       dark: {
-
+        text: {
+          primary: '#320C0E',
+          secondary: '#6B2020',
+          contrast: '#FFFFFF',
+          caption: '#030303',
+        },
+        background: '#121212',
+        grayOverlay: '#0000000D',
+        alternateBackground: '#f0f0f0',
+        primary: '#FF8484',
+        secondary: '#B83737',
+        contrast: '#6B2020',
+        overlay: '#FCE9E980',
       },
       blue: {
 

@@ -29,7 +29,7 @@ export const SearchPage: React.FC<Props> = ({location}) => {
 
   const flattenedTranscript = useMemo(() => {
     return transcript.timedText.reduce((acc, cur) => {
-      console.log('ran ');
+      // console.log('ran ');
       return acc + ' ' + cur.text.toLowerCase();
     }, '');
   }, [transcript]);
@@ -42,6 +42,7 @@ export const SearchPage: React.FC<Props> = ({location}) => {
           text={line.text}
           isGrayBackground={i % 2 === 0}
           ref={(ref) => captionLineRefs.current.push(ref)}
+          key={i}
         />
       );
     });
@@ -83,8 +84,11 @@ export const SearchPage: React.FC<Props> = ({location}) => {
   };
 
   const highlightAllMatches = (matches: HTMLDivElement[]) => {
-    matches.forEach((match) => {
+    matches.forEach((match, i) => {
       match.style.backgroundColor = 'yellow';
+      if (i === 0) {
+        match.style.backgroundColor = 'orange';
+      }
     });
   };
 
@@ -140,6 +144,7 @@ export const SearchPage: React.FC<Props> = ({location}) => {
     if (query === '') return;
 
     const matches = search(flattenedTranscript, query);
+    matches[0].scrollIntoView();
     setCaptionLineMatches(matches);
     highlightAllMatches(matches);
   };

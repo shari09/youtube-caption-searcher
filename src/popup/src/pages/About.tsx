@@ -13,7 +13,8 @@ export const About: React.FC = () => {
 
   return (
     <div sx={wrapperStyle}>
-      Under construction...
+      Under construction... If you found a bug, please open an issue 
+      at https://github.com/shari09/youtube-caption-searcher
     </div>
   );
 };

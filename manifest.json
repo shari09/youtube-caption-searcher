@@ -1,7 +1,7 @@
 {
-  "name": "Youtube Caption Search",
+  "name": "YouTube Caption Searcher",
   "version": "0.0.1",
-  "description": "Find a certain word in Youtube captions",
+  "description": "Find a certain word in YouTube captions",
   "permissions": [
     "declarativeContent"
   ],
@@ -12,7 +12,7 @@
     "persistent": false
   },
   "page_action": {
-    "default_title": "search for a word in a video",
+    "default_title": "YouTube Caption Searcher",
     "default_popup": "index.html"
   },
   "content_scripts": [
@@ -38,7 +38,7 @@
   },
   "manifest_version": 2,
   "icons": {
-    "32": "icon32.png",
-    "64": "icon64.png"
+    "32": "logo/icon32.png",
+    "64": "logo/icon64.png"
   }
 }

@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import React from 'react';
 import {jsx, SxStyleProp} from 'theme-ui';
-import {RedEllipse, WhiteEllipse} from '../components/Ellipses';
 
 export const NoTranscript: React.FC = () => {
   const wrapperStyle: SxStyleProp = {

@@ -1,8 +1,8 @@
 import {Transcript, CaptionTrack} from '../common/types';
 
-const test = 'fasdf'; //ignoreline
-console.log(test);
-console.log('content script loaded');
+// const test = 'fasdf'; //ignoreline
+// console.log(test);
+// console.log('content script loaded');
 
 let transcripts: undefined | Transcript[];
 
@@ -40,7 +40,7 @@ document.addEventListener('captionTracks', async (event) => {
     return;
   }
   transcripts = await getTranscripts(typedEvent.detail.captionTracks);
-  console.log('content', transcripts);
+  // console.log('content', transcripts);
 });
 
 const getTranscripts = async (
@@ -78,8 +78,8 @@ const getTranscripts = async (
 };
 
 const filterSpecialSymbols = (text: string) => {
-  const specialSymbols = ['&amp;quot;', '&amp;#39;'];
-  const filtered = ['"', "'"];
+  const specialSymbols = ['&amp;quot;', '&amp;#39;', '&amp;gt;'];
+  const filtered = ['"', "'", '>'];
   specialSymbols.forEach((symbol, index) => {
     text = text.replace(new RegExp(symbol, 'g'), filtered[index]);
   });

@@ -19,10 +19,11 @@ const SidePanel: React.FC<SidePanelProps> = ({toggle, setToggle}) => {
 
 
   const navLinks = useMemo(() => {
-    //key is path name, value is display
+    //key is path name, value is display text
     const links = {
       '/': 'HOME',
       '/preference': 'PREFERENCE',
+      '/features': 'FEATURES',
       '/about': 'ABOUT', 
     };
 
@@ -39,7 +40,7 @@ const SidePanel: React.FC<SidePanelProps> = ({toggle, setToggle}) => {
 
     return Object.keys(links).map(key => {
       return (
-        <Link sx={style} to={key} onClick={() => setToggle(false)}>
+        <Link sx={style} to={key} onClick={() => setToggle(false)} key={key}>
           {links[key]}
         </Link>
       );
@@ -51,7 +52,7 @@ const SidePanel: React.FC<SidePanelProps> = ({toggle, setToggle}) => {
   const wrapperStyle: SxStyleProp = {
     position: 'absolute',
     zIndex: 20,
-    width: '100vw',
+    width: '63vw',
     height: '100vh',
     left: 0,
     top: 0,
@@ -61,7 +62,9 @@ const SidePanel: React.FC<SidePanelProps> = ({toggle, setToggle}) => {
 
   const overlay: SxStyleProp = {
     position: 'absolute',
-    zIndex: -1,
+    zIndex: 2,
+    top: 0,
+    left: 0,
     width: '100vw',
     height: '100vh',
     backgroundColor: 'grayOverlay',
@@ -70,7 +73,7 @@ const SidePanel: React.FC<SidePanelProps> = ({toggle, setToggle}) => {
 
   const panelStyle: SxStyleProp = {
     zIndex: 2,
-    width: '60%',
+    width: '60vw',
     height: '100%',
     backgroundColor: 'background',
     borderRadius: '0px 15px 15px 0px',
@@ -104,20 +107,22 @@ const SidePanel: React.FC<SidePanelProps> = ({toggle, setToggle}) => {
   };
   
   return (
-    <div sx={wrapperStyle}>
+    <React.Fragment>
       <div sx={overlay} onClick={() => setToggle(false)}/>
-      <div sx={panelStyle}>
-        <div sx={topBarStyle}>
-          <FaTimes
-              sx={iconStyle}
-              onClick={() => setToggle((toggle) => !toggle)}
-          />
-        </div>
+      <div sx={wrapperStyle}>
+        <div sx={panelStyle}>
+          <div sx={topBarStyle}>
+            <FaTimes
+                sx={iconStyle}
+                onClick={() => setToggle((toggle) => !toggle)}
+            />
+          </div>
 
-        <div sx={navLinksStyle}>{navLinks}</div>
-        
+          <div sx={navLinksStyle}>{navLinks}</div>
+          
+        </div>
       </div>
-    </div>
+    </React.Fragment>
   );
 };
 

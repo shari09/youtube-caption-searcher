@@ -25,38 +25,45 @@ const sendCaptionTracks = async (href: string): Promise<void> => {
   //@ts-ignore
   const token: string = window.yt.config_.ID_TOKEN;
   //@ts-ignore
-  const clientVersion: string =
-    window.yt.config_.INNERTUBE_CONTEXT_CLIENT_VERSION;
+  const clientVersion: string = window.yt.config_.INNERTUBE_CONTEXT_CLIENT_VERSION;
   //@ts-ignore
   const clientName: string = window.yt.config_.INNERTUBE_CONTEXT_CLIENT_NAME;
 
   const reqUrl = getReqUrl(href);
   if (!reqUrl) return;
-  console.log(reqUrl);
+  // console.log(reqUrl);
+  const headers = {
+    'x-youtube-client-name': clientName,
+    'x-youtube-client-version': clientVersion,
+    'x-youtube-identity-token': token,
+    'x-youtube-csoc': '1',
+  };
+
+  if (!token) {
+    delete headers['x-youtube-identity-token'];
+  }
   const vidRawData = await fetch(reqUrl, {
     //my time consuming testing to see which headers are required
-    headers: {
-      'x-youtube-client-name': clientName,
-      'x-youtube-client-version': clientVersion,
-      'x-youtube-identity-token': token,
-    },
+    headers: headers,
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
   });
   const response = await vidRawData.json();
+  // console.log(response);
   let captionTracks;
-  if (
-    !response[2].playerResponse.captions ||
-    !response[2].playerResponse.captions.playerCaptionsTracklistRenderer
-      .captionTracks
-  ) {
+  //not all youtube acc req are in the same order
+  const playerResponse = response.find((arr: any) => arr.playerResponse).playerResponse;
+  // console.log(playerResponse);
+  if (!playerResponse) throw new Error('player response not found');
+  
+  if ( !playerResponse.captions 
+    || !playerResponse.captions.playerCaptionsTracklistRenderer.captionTracks) {
     captionTracks = null;
   } else {
     captionTracks = {
       captionTracks:
-        response[2].playerResponse.captions.playerCaptionsTracklistRenderer
-          .captionTracks,
+        playerResponse.captions.playerCaptionsTracklistRenderer.captionTracks,
     };
   }
 
@@ -65,8 +72,8 @@ const sendCaptionTracks = async (href: string): Promise<void> => {
       detail: captionTracks,
     }),
   );
-  console.log('sent new caption track');
-  console.log(captionTracks);
+  // console.log('sent new caption track');
+  // console.log(captionTracks);
 };
 
 document.addEventListener('jumpToTime', (event) => {
@@ -96,7 +103,7 @@ const addHrefChangeListener = (): void => {
       const newHref: string = window.location.href;
       if (oldHref !== newHref) {
         //get the new href if the video changes to see if there new caption tracks
-        console.log(newHref);
+        // console.log(newHref);
         sendCaptionTracks(newHref);
         oldHref = newHref;
       }

@@ -37,7 +37,7 @@ export const CaptionLine = React.forwardRef<HTMLDivElement, Props>(({
     chrome.tabs.sendMessage(
       await getActiveTabId(),
       jumpToTimePayload,
-      console.log,
+      // console.log,
     );
   };
 
