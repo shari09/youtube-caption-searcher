@@ -5,7 +5,11 @@ chrome.runtime.onInstalled.addListener(() => {
       {
         conditions: [
           new chrome.declarativeContent.PageStateMatcher({
-            pageUrl: {hostEquals: 'www.youtube.com', schemes: ['https']},
+            pageUrl: {
+              hostEquals: 'www.youtube.com',
+              schemes: ['https'],
+              pathPrefix: '/watch',
+            },
           }),
         ],
         actions: [new chrome.declarativeContent.ShowPageAction()],

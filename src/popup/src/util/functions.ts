@@ -5,3 +5,12 @@ export const getActiveTabId = async (): Promise<number> => {
   if (!tabs[0].id) throw new Error('active tab id not found');
   return tabs[0].id;
 };
+
+
+export const randInt = (min: number, max: number): number => {
+  return Math.floor(Math.random()*(max-min)+min);
+};
+
+export const randNum = (min: number, max: number): number => {
+  return Math.random()*(max-min)+min;
+};

@@ -1,85 +1,75 @@
+/** @jsx jsx */
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet} from 'react-native-web';
-import {createStackNavigator} from '@react-navigation/stack';
-import {NavigationContainer} from '@react-navigation/native';
+import {HashRouter as Router, Switch, Route} from 'react-router-dom';
+
+import {jsx, ThemeProvider} from 'theme-ui';
+import {theme} from './util/theme';
+
 import {Transcript} from '../../common/types';
 import {getActiveTabId} from './util/functions';
-import {
-  TranscriptsContext,
-  ITranscriptsContext,
-  ThemeContext,
-  defaultTheme,
-} from './util/context';
-import {SelectTrackPage} from './pages/SelectTrackPage';
-import {TrackPage} from './pages/TrackPage';
+import {LoadingScreen} from './pages/LoadingScreen';
+import {TranscriptsContext, ITranscriptsContext} from './util/context';
+import {NoTranscript} from './pages/NoTranscript';
+import {Navigation} from './components/Navigation';
+import { Home } from './pages/Home';
+import { SearchPage } from './pages/SearchPage';
+import { Preference } from './pages/Preference';
+import { About } from './pages/About';
+import { Features } from './pages/Features';
 
-const Stack = createStackNavigator();
-const App: React.FC = () => {
-  const [transcripts, setTranscripts] = useState<Transcript[] | undefined>();
+export const App: React.FC = () => {
+  const [transcripts, setTranscripts] = useState<Transcript[]>();
 
-  const styles = getStyles();
-
+  
   const loadTranscripts = async () => {
     chrome.tabs.sendMessage(
       await getActiveTabId(),
       {action: 'load'},
       (response) => {
-        console.log('res', response);
         setTranscripts(response);
+        // console.log('res', transcripts);
       },
     );
-    console.log('load script async function');
+    // console.log('transcripts loaded into extension');
+    
   };
+
   useEffect(() => {
     loadTranscripts();
   }, []);
 
-  if (transcripts === undefined) {
-    return <Text>loading</Text>;
-  }
-  if (transcripts.length === 0) {
-    return <Text>no transcripts found</Text>;
+  if (!transcripts) {
+    return <LoadingScreen />;
   }
 
+  //if there's no transcripts, it has a length of 0
   const transcriptsContext: ITranscriptsContext = {
     transcripts: transcripts,
   };
 
   return (
     <TranscriptsContext.Provider value={transcriptsContext}>
-      <ThemeContext.Provider value={defaultTheme}>
-        <NavigationContainer>
-          <View style={styles.container}>
-            <Stack.Navigator
-              screenOptions={{
-                headerShown: false,
-              }}
-            >
-              {transcripts.length > 1 ? (
-                <Stack.Screen
-                  name="SelectTrackPage"
-                  component={SelectTrackPage}
-                />
-              ) : undefined}
-              <Stack.Screen
-                name="TrackPage"
-                component={TrackPage}
-                initialParams={{trackId: 0}}
-              />
-            </Stack.Navigator>
-          </View>
-        </NavigationContainer>
-      </ThemeContext.Provider>
+      <ThemeProvider theme={theme}>
+        <Router>
+          <Navigation />
+          <Switch>            
+            <Route 
+              exact 
+              path='/' 
+              component={
+                transcripts.length === 0 //no transcripts
+                ? NoTranscript
+                : Home
+            } />
+            <Route path='/search' component={SearchPage} />
+            <Route path='/preference' component={Preference} />
+            <Route path='/about' component={About} />
+            <Route path='/features' component={Features} />
+          </Switch>
+        </Router>
+      </ThemeProvider>
     </TranscriptsContext.Provider>
   );
-};
-
-const getStyles = () => {
-  return StyleSheet.create({
-    container: {
-      width: 350,
-    },
-  });
 };
 
 export default App;

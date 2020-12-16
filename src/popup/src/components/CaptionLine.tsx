@@ -1,18 +1,19 @@
-import React, {useContext} from 'react';
-import {View, StyleSheet, Text} from 'react-native-web';
+/** @jsx jsx */
+import React from 'react';
+import {jsx, SxStyleProp} from 'theme-ui';
+import {getActiveTabId} from '../util/functions';
 
 interface Props {
   start: number;
   text: string;
-  markedTexts: {
-    index: number;
-    length: number;
-  }[];
+  isGrayBackground?: boolean;
 }
 
-export const CaptionLine: React.FC<Props> = ({start, text, markedTexts}) => {
-  const styles = getStyles();
-
+export const CaptionLine = React.forwardRef<HTMLDivElement, Props>(({
+  start,
+  text,
+  isGrayBackground,
+}, ref) => {
   const getTime = () => {
     let time = start;
     const numHour = Math.floor(time / (60 * 60));
@@ -20,77 +21,57 @@ export const CaptionLine: React.FC<Props> = ({start, text, markedTexts}) => {
     const numMin = Math.floor(time / 60);
     time = time % 60;
     const timeStr =
-      (numHour > 0 ? numHour.toString() + 'h' : '') +
-      numMin.toString() +
-      'm' +
-      time.toFixed(0) +
-      's';
+      (numHour > 0 ? numHour.toString() + ':' : '') +
+      numMin.toString().padStart(2, '0') +
+      ':' +
+      time.toFixed(0).padStart(2, '0');
     return timeStr;
   };
 
-  //TODO: pls make this a tolerable block of code cuz i don't really wanna do it rn functioing on lack of sleep
-  const getText = () => {
-    if (markedTexts.length === 0) return text;
-    const markStyle = {
-      paddingLeft: 0,
-      paddingRight: 0,
+  const jumpToTime = async () => {
+    const jumpToTimePayload = {
+      action: 'jumpToTime',
+      data: {time: start},
     };
 
-    const subStrings = markedTexts.reduce((acc, pos) => {
-      //[normal text, marked text, lastIndex]
-      //find the index where the string slicing ended at
-      const lastIndex = acc.length > 0 ? acc[acc.length - 1][2] : 0;
-      acc.push([
-        text.slice(lastIndex, pos.index),
-        <mark style={markStyle}>
-          {text.slice(
-            pos.index,
-            pos.index + pos.length,
-          )}
-        </mark>,
-        pos.index + pos.length,
-      ]);
-      return acc;
-    }, [] as any[][]);
-    const lastElement = text.slice(subStrings[subStrings.length - 1][2]);
-    const elements = subStrings.reduce((acc, group) => {
-      acc.push(group[0]);
-      acc.push(group[1]);
-      return acc;
-    }, [] as any[]);
-    elements.push(lastElement);
-    return elements;
+    chrome.tabs.sendMessage(
+      await getActiveTabId(),
+      jumpToTimePayload,
+      // console.log,
+    );
+  };
+
+  const wrapperStyle: SxStyleProp = {
+    display: 'flex',
+    flexDirection: 'row',
+    py: 2,
+    backgroundColor: isGrayBackground ? 'alternateBackground' : 'background',
+    color: 'text.caption',
+  };
+
+  const timeStyle: SxStyleProp = {
+    display: 'flex',
+    mr: 'auto',
+    alignItems: 'center',
+    px: '.5em',
+    flex: 1.2,
+    '&:hover': {
+      cursor: 'pointer',
+      opacity: 0.7,
+    },
+  };
+
+  const textStyle: SxStyleProp = {
+    overflowWrap: 'anywhere',
+    flex: 5,
   };
 
   return (
-    <div style={styles.container}>
-      <span style={styles.start}>
-        <Text>{getTime()}</Text>
-      </span>
-      <span style={styles.text}>{getText()}</span>
+    <div sx={wrapperStyle} ref={ref}>
+      <div sx={timeStyle} onClick={jumpToTime}>
+        {getTime()}
+      </div>
+      <div sx={textStyle}>{text}</div>
     </div>
   );
-};
-
-const getStyles = () => {
-  return {
-    container: {
-      flexDirection: 'row' as 'row',
-      backgroundColor: 'white',
-      paddingBottom: 5,
-      display: 'flex' as 'flex',
-    },
-    start: {
-      flex: 1,
-      paddingLeft: 5,
-      paddingRight: 5,
-      fontSize: 10,
-    },
-    text: {
-      flex: 5,
-      paddingLeft: 5,
-    },
-  };
-};
-
-export default CaptionLine;
+});
